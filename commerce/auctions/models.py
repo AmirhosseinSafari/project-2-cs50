@@ -44,3 +44,9 @@ class Auction_listing(models.Model): #card
         return f"commodity: {self.commodity_title}, price: {self.price}, created time: {self.created_time}"
 
 
+class User_listing(models.Model):
+    user = models.ForeignKey( User, on_delete=models.CASCADE, related_name="clients")
+    listing = models.ForeignKey( Auction_listing,  on_delete=models.CASCADE, related_name="clients_sellings")
+
+    def __str__(self):
+        return f"user: {self.user}, listing: {self.listing.commodity_title}"
