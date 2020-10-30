@@ -29,6 +29,7 @@ class Bids(models.Model):
 
 
 class Auction_listing(models.Model): #card
+    #todo: category should be a charfield
     commodity_title = models.CharField(max_length=100, help_text="This title going to be shown in head of your listing")
     price = models.DecimalField(max_digits=9, decimal_places=2)
     created_time = models.DateField(auto_now_add=True)
