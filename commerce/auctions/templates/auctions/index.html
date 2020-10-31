@@ -1,7 +1,25 @@
-{% extends "auctions/layout.html" %}
+{% extends "auctions/layout.html" %} {% block body %}
+<h2>Active Listings</h2>
 
-{% block body %}
-    <h2>Active Listings</h2>
+    {% if auctions_listing %}    
+    <div class="col-12">
+        {% for auction in auctions_listing %}
+            <div class="card mb-3">
+              <img class="card-img-top" src={{ auction.URL_image }} alt="Card image cap" />
+              <div class="card-body">
+                <h5 class="card-title">{{ auction.commodity_title }}</h5>
+                <p class="card-text">
+                  {{ auction.description }}
+                </p>
+                <p class="card-text">
+                  <small class="text-muted">{{ auction.created_time }}</small>
+                </p>
+              </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <h5>No auction is active!</h5>
+    {% endif %}
 
-    TODO
 {% endblock %}

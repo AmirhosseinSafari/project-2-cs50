@@ -6,11 +6,16 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
+from .models import Auction_listing
+
 from .models import User
 from .forms import Auction_listing_form
 
 def index(request):
-    return render(request, "auctions/index.html")
+    context = {
+        "auctions_listing": Auction_listing.objects.all()
+    }
+    return render(request, "auctions/index.html", context)
 
 
 def login_view(request):
@@ -76,6 +81,7 @@ def new_listing(request):
             new.creator = request.user
             new.save()
             messages.success(request, "Your listing is saved successfully")
+            print("saved")
             return HttpResponseRedirect(reverse(index))
         except ValueError:
             pass
@@ -85,3 +91,4 @@ def new_listing(request):
     return render(request, "auctions/new_listing.html", {
         "form": form
     })
+

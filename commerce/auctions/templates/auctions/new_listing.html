@@ -3,7 +3,7 @@
 {% block body %}
     <h2>New Listings</h2>
 
-    <form action="{% url 'index' %}" method="post">
+    <form action="{% url 'new_listing' %}" method="post">
         {% csrf_token %}
         {% for field in form %}
             <div class="form-group row">
