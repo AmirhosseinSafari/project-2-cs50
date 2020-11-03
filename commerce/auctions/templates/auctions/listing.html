@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %} {% block body %}
+
+<h2> Listing: {{ listing.commodity_title }} </h2>
+<img src={{ listing.URL_image }} alt="listing_image">
+<p> {{ listing.description }} </p>
+<h3> {{ listing.starting_price }}$ </h3>
+
+{% if listing.bids.all.count == 0  %}
+    <p>No bids until now, be the first!</p>
+{% else %}    
+    <p>{{ listing.bids.all.count }} so far.</p>
+{% endif %}
+
+{% if error_message %}
+    <p>{{ error_message }}</p>
+{% endif %}
+<form action="{% url 'listing' listing.id%}" method="post">
+    {% csrf_token %}
+    <input autofocus class="form-control" type="text" name="bid" placeholder="Bid">
+    <input class="btn btn-primary" type="submit" value="Submit!">
+</form>
+
+
+<h4>Details</h4>
+ <ul>
+    <li>Listed by: {{ listing.creator.username }}</li>
+    <li>Category: {{ listing.category }}</li>
+    <li>Created time: {{ listing.created_time }}</li>
+ </ul>
+
+<h4>comments</h4>
+
+
+
+{% endblock %}

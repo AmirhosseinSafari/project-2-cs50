@@ -92,3 +92,29 @@ def new_listing(request):
         "form": form
     })
 
+
+def listing (request, listing_id):
+
+    if request.method == "POST":
+        new_bid = str( request.POST["bid"] )
+        old_bid = str ( Auction_listing.objects.get(id=listing_id).bids.first() )
+        starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
+
+        if ( new_bid < old_bid ) or ( int(new_bid) <= int(starting_price) ):
+            content = {
+            "listing": Auction_listing.objects.get(id=listing_id),
+            "error_message": "Error: You can NOT bid less that price!"
+            }
+            return render(request, "auctions/listing.html", content)
+        else:
+            #todo: commiting new bid 
+            #todo: passing comments
+            pass
+    
+    else:
+        content = {
+            "listing": Auction_listing.objects.get(id=listing_id)  
+        }
+
+        return render(request, "auctions/listing.html", content)
+
