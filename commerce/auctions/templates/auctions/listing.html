@@ -8,7 +8,7 @@
 {% if listing.bids.all.count == 0  %}
     <p>No bids until now, be the first!</p>
 {% else %}    
-    <p>{{ listing.bids.all.count }} so far.</p>
+    <p>{{ listing.bids.all.count }} bids so far.</p>
 {% endif %}
 
 {% if error_message %}
@@ -31,6 +31,19 @@
 
 <h4>comments</h4>
 
+{% if listing.comments.all.count == 0 %}
+    <p>No comments until now, be the first!</p>
+{% else %}
+    <p> {{ listing.comments.all.count }} comments so far. </p>
+    {% for comment in comments %}
+        <p>{{ comment.author.username }}: {{ comment.text }}</p>
+    {% endfor %}
+{% endif %}
 
+<form action="{% url 'listing' listing.id%}" method="POST">
+    {% csrf_token %}
+    {{ comments_form.as_p }}
+    <input class="btn btn-primary" type="submit" value="Submit!">
+</form>
 
 {% endblock %}

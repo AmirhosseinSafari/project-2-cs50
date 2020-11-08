@@ -6,10 +6,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Auction_listing, Bids
+from .models import Auction_listing, Bids, Comments
 
 from .models import User
-from .forms import Auction_listing_form, Bids_form
+from .forms import Auction_listing_form, Bids_form, Comments_form
 
 def index(request):
     context = {
@@ -101,51 +101,93 @@ def listing (request, listing_id):
     if request.method == "POST":
 
         bid_form = Bids_form(request.POST or None)
+        comments_form = Comments_form(request.POST or None)
+
         new_bid = bid_form['amount'].value()
-        new_bid = float (new_bid)
+        new_comment = comments_form['text'].value()
 
-        old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
-        print(old_bid)
 
-        if old_bid == None:
-            old_bid = 0
-        else:
-            old_bid = old_bid.amount
+        #-----------------------------------------------------------------------
+        # Creating bids
+        #-----------------------------------------------------------------------
 
-        starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
+        if new_bid != None:
 
-        if ( new_bid < old_bid ) or ( new_bid < float (starting_price) ):
-            content = {
-            "listing": Auction_listing.objects.get(id=listing_id),
-            "error_message": "Error: You can NOT bid less than the price!",
-            "bid_form": bid_form
-            }
-            return render(request, "auctions/listing.html", content)
-        else:
+            new_bid = float (new_bid)
+            old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
 
+            if old_bid == None:
+                old_bid = 0
+            else:
+                old_bid = old_bid.amount
+
+            starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
             
-            user_bid = Bids(bidder=request.user, amount=new_bid)
-            bid_form = Bids_form(request.POST, instance=user_bid)
+            #-----------------------------------------------------------------------
+            # Checking that bid isn't lower than price
+            #-----------------------------------------------------------------------
             
+            if ( new_bid < old_bid ) or ( new_bid < float (starting_price) ):
+                content = {
+                "listing": Auction_listing.objects.get(id=listing_id),
+                "error_message": "Error: You can NOT bid less than the price!",
+                "bid_form": bid_form,
+                "comments_form": comments_form
+                }
+                return render(request, "auctions/listing.html", content)
+            else:
+                #-----------------------------------------------------------------------
+                # Commiting bid
+                #-----------------------------------------------------------------------
+
+                user_bid = Bids(bidder=request.user, amount=new_bid)
+                bid_form = Bids_form(request.POST, instance=user_bid)
+
+                listing = Auction_listing.objects.get(id=listing_id)
+
+                if bid_form.is_valid():
+                    bid_form.save()
+                    messages.success(request, "Thanks, your bid was created successfully!")
+                    listing.bids.add(user_bid)
+
+        #-----------------------------------------------------------------------
+        # Creating commetns
+        #-----------------------------------------------------------------------
+
+        if new_comment != None:
+            
+            user_comment = Comments(author=request.user, text=new_comment)
+            comment_form = Comments_form(request.POST, instance=user_comment)
+
             listing = Auction_listing.objects.get(id=listing_id)
-            
 
-            if bid_form.is_valid():
-                bid_form.save()
-                messages.success(request, "Thanks, your bid was created successfully!")
+            if comment_form.is_valid():
+                comment_form.save()
+                messages.success(request, "Thanks, your comment was created successfully!")
+                listing.comments.add(user_comment)
+        
             
-            listing.bids.add(user_bid)
-            #todo: passing comments
-            
-            return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
+        return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
     
     else:
         bid_form = Bids_form(request.POST or None)
+        comments_form = Comments_form(request.POST or None)
         
+        all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
+        all_comments_list = []
+
+        for comment in all_comments:
+            all_comments_list.append(comment)
+
+        #print( b[0].author.username )
+
         content = {
             "listing": Auction_listing.objects.get(id=listing_id),
-            "bid_form": bid_form
+            "bid_form": bid_form,
+            "comments_form": comments_form,
+            "comments": all_comments_list
         }
 
         return render(request, "auctions/listing.html", content)
 
+#<QuerySet [<Comments: author: amirhossein, text: test>]>

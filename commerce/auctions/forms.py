@@ -1,5 +1,5 @@
 from django.forms import ModelForm, Textarea
-from auctions.models import Auction_listing, Bids
+from auctions.models import Auction_listing, Bids, Comments
 from django import forms
 
 class  Auction_listing_form(ModelForm):
@@ -26,7 +26,7 @@ class  Auction_listing_form(ModelForm):
 
 
 class Bids_form(ModelForm):
-    amount = forms.DecimalField(required=True,
+    amount = forms.DecimalField(required=False,
     widget=forms.NumberInput(
         attrs={"name": "user_bid", "placeholder": "Your bid"}
     )
@@ -35,3 +35,15 @@ class Bids_form(ModelForm):
     class Meta:
         model = Bids
         fields = ['amount']
+
+class Comments_form(ModelForm):
+    text = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+        attrs={"cols": 35, "rows": 3, "class": "form_description"}
+        )
+        )
+
+    class Meta:
+        model = Comments
+        fields = ['text']
