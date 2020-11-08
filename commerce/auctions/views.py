@@ -115,6 +115,7 @@ def listing (request, listing_id):
 
             new_bid = float (new_bid)
             old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
+            #print(old_bid)
 
             if old_bid == None:
                 old_bid = 0
@@ -127,10 +128,10 @@ def listing (request, listing_id):
             # Checking that bid isn't lower than price
             #-----------------------------------------------------------------------
             
-            if ( new_bid < old_bid ) or ( new_bid < float (starting_price) ):
+            if ( new_bid < old_bid ) or ( new_bid <= float (starting_price) ):
                 content = {
                 "listing": Auction_listing.objects.get(id=listing_id),
-                "error_message": "Error: You can NOT bid less than the price!",
+                "error_message": "Error: You can NOT bid less than or equal to the price!",
                 "bid_form": bid_form,
                 "comments_form": comments_form
                 }
