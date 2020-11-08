@@ -9,6 +9,11 @@
     <p>No bids until now, be the first!</p>
 {% else %}    
     <p>{{ listing.bids.all.count }} bids so far.</p>
+    {% if listing.bids.last.bidder.username == user.username %}
+        <p>Last bid is for you!</p>
+    {% else %}
+        <p>Last bid is for another user!</p>
+    {% endif %}
 {% endif %}
 
 {% if error_message %}
