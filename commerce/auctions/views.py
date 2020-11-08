@@ -148,7 +148,10 @@ def listing (request, listing_id):
                 if bid_form.is_valid():
                     bid_form.save()
                     messages.success(request, "Thanks, your bid was created successfully!")
+                    Auction_listing.objects.filter(id=listing_id).update(starting_price=new_bid)
                     listing.bids.add(user_bid)
+                    
+
 
         #-----------------------------------------------------------------------
         # Creating commetns
@@ -165,7 +168,6 @@ def listing (request, listing_id):
                 comment_form.save()
                 messages.success(request, "Thanks, your comment was created successfully!")
                 listing.comments.add(user_comment)
-        
             
         return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
     
@@ -179,8 +181,6 @@ def listing (request, listing_id):
         for comment in all_comments:
             all_comments_list.append(comment)
 
-        #print( b[0].author.username )
-
         content = {
             "listing": Auction_listing.objects.get(id=listing_id),
             "bid_form": bid_form,
@@ -190,4 +190,3 @@ def listing (request, listing_id):
 
         return render(request, "auctions/listing.html", content)
 
-#<QuerySet [<Comments: author: amirhossein, text: test>]>
