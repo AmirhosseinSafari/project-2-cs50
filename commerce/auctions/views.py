@@ -6,10 +6,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Auction_listing
+from .models import Auction_listing, Bids
 
 from .models import User
-from .forms import Auction_listing_form
+from .forms import Auction_listing_form, Bids_form
 
 def index(request):
     context = {
@@ -76,44 +76,75 @@ def new_listing(request):
     if request.method == "POST":
         form = Auction_listing_form(request.POST)
         try:
-            new = form.save(commit=False)
-            assert request.user.is_authenticated
-            new.creator = request.user
-            new.save()
-            messages.success(request, "Your listing is saved successfully")
-            print("saved")
-            return HttpResponseRedirect(reverse(index))
+            if form.valid():
+                new = form.save(commit=False)
+                assert request.user.is_authenticated
+                new.creator = request.user
+                new.save()
+                messages.success(request, "Your listing is saved successfully")
+                return HttpResponseRedirect(reverse(index))
+
         except ValueError:
-            pass
+            return render(request, "auctions/messages.html", {
+                "message": "Error! in saving auction proccess..."
+            })
         
     else:
         form = Auction_listing_form()
-    return render(request, "auctions/new_listing.html", {
-        "form": form
-    })
+        return render(request, "auctions/new_listing.html", {
+            "form": form
+        })
 
-
+@login_required
 def listing (request, listing_id):
 
     if request.method == "POST":
-        new_bid = str( request.POST["bid"] )
-        old_bid = str ( Auction_listing.objects.get(id=listing_id).bids.first() )
+
+        bid_form = Bids_form(request.POST or None)
+        new_bid = bid_form['amount'].value()
+        new_bid = float (new_bid)
+
+        old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
+        print(old_bid)
+
+        if old_bid == None:
+            old_bid = 0
+        else:
+            old_bid = old_bid.amount
+
         starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
 
-        if ( new_bid < old_bid ) or ( int(new_bid) <= int(starting_price) ):
+        if ( new_bid < old_bid ) or ( new_bid < float (starting_price) ):
             content = {
             "listing": Auction_listing.objects.get(id=listing_id),
-            "error_message": "Error: You can NOT bid less that price!"
+            "error_message": "Error: You can NOT bid less than the price!",
+            "bid_form": bid_form
             }
             return render(request, "auctions/listing.html", content)
         else:
-            #todo: commiting new bid 
+
+            
+            user_bid = Bids(bidder=request.user, amount=new_bid)
+            bid_form = Bids_form(request.POST, instance=user_bid)
+            
+            listing = Auction_listing.objects.get(id=listing_id)
+            
+
+            if bid_form.is_valid():
+                bid_form.save()
+                messages.success(request, "Thanks, your bid was created successfully!")
+            
+            listing.bids.add(user_bid)
             #todo: passing comments
-            pass
+            
+            return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
     
     else:
+        bid_form = Bids_form(request.POST or None)
+        
         content = {
-            "listing": Auction_listing.objects.get(id=listing_id)  
+            "listing": Auction_listing.objects.get(id=listing_id),
+            "bid_form": bid_form
         }
 
         return render(request, "auctions/listing.html", content)

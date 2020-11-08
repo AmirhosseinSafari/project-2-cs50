@@ -29,9 +29,7 @@ class Bids(models.Model):
 
 
 class Auction_listing(models.Model): #card
-    #todo: category should be a charfield
     commodity_title = models.CharField(max_length=100, help_text="This title going to be shown in head of your listing")
-    #price = models.DecimalField(max_digits=9, decimal_places=2, blank=True)
     created_time = models.DateField(auto_now_add=True)
     bids = models.ManyToManyField(Bids)
     comments = models.ManyToManyField(Comments)
@@ -39,11 +37,10 @@ class Auction_listing(models.Model): #card
     description = models.CharField(max_length=2000, help_text="Give more information about your comodity to sell it faster!")
     starting_price = models.DecimalField(max_digits=9, decimal_places=2, help_text="Enter base price of your commodity")
     URL_image = models.CharField(max_length=2000, blank=True, help_text="Url of image that going to be displayed on your listing")
-    #category = models.ForeignKey(Categories, blank=True, help_text="Write categoty of your listing", on_delete=models.CASCADE) 
     category = models.CharField(max_length=50, help_text="write category type of your listing")
     #note: first should update categoties then this category
     def __str__(self):
-        return f"commodity: {self.commodity_title}, price: {self.price}, created time: {self.created_time}"
+        return f"commodity: {self.commodity_title}, created time: {self.created_time}"
 
 
 class User_listing(models.Model):

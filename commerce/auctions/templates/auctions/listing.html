@@ -14,9 +14,10 @@
 {% if error_message %}
     <p>{{ error_message }}</p>
 {% endif %}
-<form action="{% url 'listing' listing.id%}" method="post">
+
+<form action="{% url 'listing' listing.id%}" method="POST">
     {% csrf_token %}
-    <input autofocus class="form-control" type="text" name="bid" placeholder="Bid">
+    {{ bid_form.as_p }}
     <input class="btn btn-primary" type="submit" value="Submit!">
 </form>
 
