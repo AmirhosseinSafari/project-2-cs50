@@ -38,12 +38,15 @@
     <p>{{ error_message }}</p>
 {% endif %}
 
-<form action="{% url 'listing' listing.id%}" method="POST">
-    {% csrf_token %}
-    {{ bid_form.as_p }}
-    <input class="btn btn-primary" type="submit" value="Submit!">
-</form>
-
+{% if bid_form %}
+    <form action="{% url 'listing' listing.id%}" method="POST">
+        {% csrf_token %}
+        {{ bid_form.as_p }}
+        <input class="btn btn-primary" type="submit" value="Submit!">
+    </form>
+{% else %}
+    <p> Sorry, You can't bid because listing is closed by listing's owner</p>
+{% endif %}
 
 <h4>Details</h4>
  <ul>
@@ -51,6 +54,16 @@
     <li>Category: {{ listing.category }}</li>
     <li>Created time: {{ listing.created_time }}</li>
  </ul>
+ 
+ {% if listing.creator.username ==  user.username %}
+    <form action="{% url 'listing' listing.id %}" method="POST">
+        {% csrf_token %}
+        <input class="btn btn-danger" 
+        type="submit"
+        value="Close the listing"
+        name="close_listing"> 
+    </form>
+{% endif %}
 
 <h4>comments</h4>
 

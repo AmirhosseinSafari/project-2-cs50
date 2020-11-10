@@ -97,7 +97,6 @@ def new_listing(request):
 
 @login_required
 def listing (request, listing_id):
-    #TODO: adding to watchlist
 
     if request.method == "POST":
 
@@ -107,52 +106,93 @@ def listing (request, listing_id):
         new_bid = bid_form['amount'].value()
         new_comment = comments_form['text'].value()
 
+        #-----------------------------------------------------------------------
+        # Closing
+        #-----------------------------------------------------------------------
+        
+        if "close_listing" in request.POST:
+            Auction_listing.objects.filter(id=listing_id).update(closed=True)
 
+        if not (Auction_listing.objects.get(id=listing_id).closed) :
+        
         #-----------------------------------------------------------------------
         # Creating bids
         #-----------------------------------------------------------------------
 
-        if new_bid != None:
+            if new_bid != None:
 
-            new_bid = float (new_bid)
-            old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
-            #print(old_bid)
+                new_bid = float (new_bid)
+                old_bid = Auction_listing.objects.get(id=listing_id).bids.first()
+                #print(old_bid)
 
-            if old_bid == None:
-                old_bid = 0
-            else:
-                old_bid = old_bid.amount
+                if old_bid == None:
+                    old_bid = 0
+                else:
+                    old_bid = old_bid.amount
 
-            starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
-            
-            #-----------------------------------------------------------------------
-            # Checking that bid isn't lower than price
-            #-----------------------------------------------------------------------
-            
-            if ( new_bid < old_bid ) or ( new_bid <= float (starting_price) ):
-                content = {
-                "listing": Auction_listing.objects.get(id=listing_id),
-                "error_message": "Error: You can NOT bid less than or equal to the price!",
-                "bid_form": bid_form,
-                "comments_form": comments_form
-                }
-                return render(request, "auctions/listing.html", content)
-            else:
+                starting_price = str (Auction_listing.objects.get(id=listing_id).starting_price )
+
                 #-----------------------------------------------------------------------
-                # Commiting bid
+                # Checking that bid isn't lower than price
                 #-----------------------------------------------------------------------
 
-                user_bid = Bids(bidder=request.user, amount=new_bid)
-                bid_form = Bids_form(request.POST, instance=user_bid)
+                if ( new_bid < old_bid ) or ( new_bid <= float (starting_price) ):
+                    all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
+                    all_comments_list = []
 
-                listing = Auction_listing.objects.get(id=listing_id)
+                    for comment in all_comments:
+                        all_comments_list.append(comment)
 
-                if bid_form.is_valid():
-                    bid_form.save()
-                    messages.success(request, "Thanks, your bid was created successfully!")
-                    Auction_listing.objects.filter(id=listing_id).update(starting_price=new_bid)
-                    listing.bids.add(user_bid)
-                    
+                    watchlist = User_listing.objects.filter( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+
+                    content = {
+                    "listing": Auction_listing.objects.get(id=listing_id),
+                    "error_message": "Error: You can NOT bid less than or equal to the price!",
+                    "bid_form": bid_form,
+                    "comments_form": comments_form,
+                    "comments": all_comments_list,
+                    "watchlist": watchlist
+                    }
+                    return render(request, "auctions/listing.html", content)
+                else:
+                    #-----------------------------------------------------------------------
+                    # Commiting bid
+                    #-----------------------------------------------------------------------
+
+                    user_bid = Bids(bidder=request.user, amount=new_bid)
+                    bid_form = Bids_form(request.POST, instance=user_bid)
+
+                    listing = Auction_listing.objects.get(id=listing_id)
+
+                    if bid_form.is_valid():
+                        bid_form.save()
+                        messages.success(request, "Thanks, your bid was created successfully!")
+                        Auction_listing.objects.filter(id=listing_id).update(starting_price=new_bid)
+                        listing.bids.add(user_bid)
+
+        #-----------------------------------------------------------------------
+        # If listing not closed
+        #-----------------------------------------------------------------------
+
+        else:
+
+            all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
+            all_comments_list = []
+
+            for comment in all_comments:
+                all_comments_list.append(comment)
+
+            watchlist = User_listing.objects.filter( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+
+            content = {
+            "listing": Auction_listing.objects.get(id=listing_id),
+            "bid_form": "",
+            "comments_form": comments_form,
+            "comments": all_comments_list,
+            "watchlist": watchlist
+            }
+
+            return render(request, "auctions/listing.html", content)
 
         #-----------------------------------------------------------------------
         # Creating commetns
@@ -185,6 +225,11 @@ def listing (request, listing_id):
             watchlist_listing.delete()
 
         return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
+    
+    
+    #-----------------------------------------------------------------------
+    # Get request
+    #-----------------------------------------------------------------------
     
     else:
         bid_form = Bids_form(request.POST or None)

@@ -38,6 +38,7 @@ class Auction_listing(models.Model): #card
     starting_price = models.DecimalField(max_digits=9, decimal_places=2, help_text="Enter base price of your commodity")
     URL_image = models.CharField(max_length=2000, blank=True, help_text="Url of image that going to be displayed on your listing")
     category = models.CharField(max_length=50, help_text="write category type of your listing")
+    closed = models.BooleanField(default=False)
     #note: first should update categoties then this category
     def __str__(self):
         return f"commodity: {self.commodity_title}, created time: {self.created_time}"
