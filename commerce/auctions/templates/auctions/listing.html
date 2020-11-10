@@ -5,6 +5,24 @@
 <p> {{ listing.description }} </p>
 <h3> {{ listing.starting_price }}$ </h3>
 
+{% if watchlist %}
+    <form action="{% url 'listing' listing.id %}" method="POST">
+        {% csrf_token %}
+        <input class="btn btn-warning" 
+        type="submit" 
+        value="Remove from watchlist" 
+        name="remove_from_watchlist"> 
+    </form>
+{% else %}
+    <form action="{% url 'listing' listing.id %}" method="POST">
+        {% csrf_token %}
+        <input class="btn btn-info" 
+        type="submit"
+        value="Add to watchlist"
+        name="add_to_watchlist"> 
+    </form>
+{% endif %}
+
 {% if listing.bids.all.count == 0  %}
     <p>No bids until now, be the first!</p>
 {% else %}    

@@ -8,7 +8,7 @@ from django.contrib import messages
 
 from .models import Auction_listing, Bids, Comments
 
-from .models import User
+from .models import User, User_listing
 from .forms import Auction_listing_form, Bids_form, Comments_form
 
 def index(request):
@@ -97,6 +97,7 @@ def new_listing(request):
 
 @login_required
 def listing (request, listing_id):
+    #TODO: adding to watchlist
 
     if request.method == "POST":
 
@@ -153,7 +154,6 @@ def listing (request, listing_id):
                     listing.bids.add(user_bid)
                     
 
-
         #-----------------------------------------------------------------------
         # Creating commetns
         #-----------------------------------------------------------------------
@@ -169,25 +169,64 @@ def listing (request, listing_id):
                 comment_form.save()
                 messages.success(request, "Thanks, your comment was created successfully!")
                 listing.comments.add(user_comment)
+        
+        
+        #-----------------------------------------------------------------------
+        # Creating watchlist
+        #-----------------------------------------------------------------------
+
+        if "add_to_watchlist" in request.POST:
+            watchlist_listing = User_listing(user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+            watchlist_listing.save()
+            messages.success(request, "Listing added to your watchlist successfully!")
             
+        if "remove_from_watchlist" in request.POST:
+            watchlist_listing = User_listing.objects.get( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+            watchlist_listing.delete()
+
         return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
     
     else:
         bid_form = Bids_form(request.POST or None)
         comments_form = Comments_form(request.POST or None)
-        
+
         all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
         all_comments_list = []
 
         for comment in all_comments:
             all_comments_list.append(comment)
 
+        watchlist = User_listing.objects.filter( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+        
         content = {
             "listing": Auction_listing.objects.get(id=listing_id),
             "bid_form": bid_form,
             "comments_form": comments_form,
-            "comments": all_comments_list
+            "comments": all_comments_list,
+            "watchlist": watchlist
         }
 
         return render(request, "auctions/listing.html", content)
+
+@login_required
+def watchlist(request):
+
+        if request.user.is_authenticated:
+            user = request.user
+            watchlist = User_listing.objects.filter(user=user)
+
+            #-----------------------------------------------------------------------
+            # User listing:
+            #       user
+            #       listing
+            #-----------------------------------------------------------------------
+            
+            watchlist_arr = []
+            for field in watchlist:
+                watchlist_arr.append( field.listing )
+
+            content = {
+                "watchlist_listing": watchlist_arr
+            }
+            return render(request, "auctions/watchlist.html", content)
 

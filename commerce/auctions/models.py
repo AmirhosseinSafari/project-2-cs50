@@ -48,4 +48,4 @@ class User_listing(models.Model):
     listing = models.ForeignKey( Auction_listing,  on_delete=models.CASCADE, related_name="clients_sellings")
 
     def __str__(self):
-        return f"user: {self.user}, listing: {self.listing.commodity_title}"
+        return f"user: {self.user.username}, listing: {self.listing.commodity_title}, listing_id: {self.listing.id}"
