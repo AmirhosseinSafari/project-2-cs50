@@ -232,7 +232,12 @@ def listing (request, listing_id):
     #-----------------------------------------------------------------------
     
     else:
+        
         bid_form = Bids_form(request.POST or None)
+
+        if Auction_listing.objects.get(id=listing_id).closed :
+            bid_form = ""
+            
         comments_form = Comments_form(request.POST or None)
 
         all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
