@@ -110,14 +110,14 @@ def listing (request, listing_id):
         # Closing
         #-----------------------------------------------------------------------
         
-        if "close_listing" in request.POST:
+        if "close_listing" in request.POST and (request.user == Auction_listing.objects.get(id=listing_id).creator):
             Auction_listing.objects.filter(id=listing_id).update(closed=True)
 
         if not (Auction_listing.objects.get(id=listing_id).closed) :
         
-        #-----------------------------------------------------------------------
-        # Creating bids
-        #-----------------------------------------------------------------------
+            #-----------------------------------------------------------------------
+            # Creating bids
+            #-----------------------------------------------------------------------
 
             if new_bid != None:
 

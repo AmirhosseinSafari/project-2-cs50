@@ -45,7 +45,14 @@
         <input class="btn btn-primary" type="submit" value="Submit!">
     </form>
 {% else %}
-    <p> Sorry, You can't bid because listing is closed by listing's owner</p>
+
+    {% if user.username == listing.bids.last.bidder.username %}
+        <h6>Listing is closed.</h6>
+        <h5 style="color: green;"> congratulations! You are the winner!</h5>
+    {% else %}    
+        <h6> Sorry, You can't bid because listing is closed by listing's owner </h6>
+    {% endif %}
+
 {% endif %}
 
 <h4>Details</h4>
@@ -54,15 +61,24 @@
     <li>Category: {{ listing.category }}</li>
     <li>Created time: {{ listing.created_time }}</li>
  </ul>
- 
+
  {% if listing.creator.username ==  user.username %}
-    <form action="{% url 'listing' listing.id %}" method="POST">
-        {% csrf_token %}
+    {% if listing.closed == False %}
+        <form action="{% url 'listing' listing.id %}" method="POST">
+            {% csrf_token %}
+            <input class="btn btn-danger" 
+            type="submit"
+            value="Close the listing"
+            name="close_listing"> 
+        </form>
+    {% else %}
         <input class="btn btn-danger" 
-        type="submit"
-        value="Close the listing"
-        name="close_listing"> 
-    </form>
+            type="submit"
+            value="Close the listing"
+            name="close_listing"
+            disabled
+            style="cursor: default;">
+    {% endif %}
 {% endif %}
 
 <h4>comments</h4>
