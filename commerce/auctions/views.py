@@ -285,12 +285,29 @@ def watchlist(request):
             }
             return render(request, "auctions/watchlist.html", content)
 
+
 def categories(request):
-
+        
     category = Categories.objects.all()
-
     content = {
         "categories": category
     }
-
     return render(request, "auctions/categories.html", content)
+
+
+
+def categories_listing(request, category_title):
+    
+    auctions = Auction_listing.objects.filter(category=category_title)
+
+    content = {
+        "auctions": auctions,
+        "category_title": category_title
+    }
+
+    return render(request, "auctions/category_listing.html", content)
+
+
+
+
+
