@@ -16,6 +16,12 @@ class Comments(models.Model):
     
 class Categories(models.Model):
     category = models.CharField(max_length=50)
+    
+    @classmethod
+    def create(cls, category):
+        category_obj = cls(category=category)
+        
+        return category_obj
 
     def __str__(self):
         return f"category: {self.category}"

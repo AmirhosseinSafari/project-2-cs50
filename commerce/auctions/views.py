@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Auction_listing, Bids, Comments
+from .models import Auction_listing, Bids, Comments, Categories
 
 from .models import User, User_listing
 from .forms import Auction_listing_form, Bids_form, Comments_form
@@ -76,15 +76,20 @@ def new_listing(request):
     if request.method == "POST":
         form = Auction_listing_form(request.POST)
         try:
-            if form.valid():
-                new = form.save(commit=False)
-                assert request.user.is_authenticated
-                new.creator = request.user
-                new.save()
-                messages.success(request, "Your listing is saved successfully")
-                return HttpResponseRedirect(reverse(index))
+            new = form.save(commit=False)
+            assert request.user.is_authenticated
+            new.creator = request.user
+            new.save()
+            messages.success(request, "Your listing is saved successfully")
+            
+            category = request.POST
+            new_category = Categories.create(category['category']) 
+            new_category.save()
 
-        except ValueError:
+            return HttpResponseRedirect(reverse(index))
+
+        except ValueError as error:
+            print(error)
             return render(request, "auctions/messages.html", {
                 "message": "Error! in saving auction proccess..."
             })
@@ -171,7 +176,7 @@ def listing (request, listing_id):
                         listing.bids.add(user_bid)
 
         #-----------------------------------------------------------------------
-        # If listing not closed
+        # If listing closed
         #-----------------------------------------------------------------------
 
         else:
@@ -237,7 +242,7 @@ def listing (request, listing_id):
 
         if Auction_listing.objects.get(id=listing_id).closed :
             bid_form = ""
-            
+
         comments_form = Comments_form(request.POST or None)
 
         all_comments = Auction_listing.objects.get(id=listing_id).comments.all()
@@ -280,3 +285,12 @@ def watchlist(request):
             }
             return render(request, "auctions/watchlist.html", content)
 
+def categories(request):
+
+    category = Categories.objects.all()
+
+    content = {
+        "categories": category
+    }
+
+    return render(request, "auctions/categories.html", content)

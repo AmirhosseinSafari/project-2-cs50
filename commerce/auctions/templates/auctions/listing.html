@@ -1,7 +1,11 @@
 {% extends "auctions/layout.html" %} {% block body %}
 
 <h2> Listing: {{ listing.commodity_title }} </h2>
-<img src={{ listing.URL_image }} alt="listing_image">
+
+<img src="{% if listing.URL_image %} {{ listing.URL_image }} 
+          {% else %} ../../static/default.png
+          {% endif %}" alt="listing_image" />
+
 <p> {{ listing.description }} </p>
 <h3> {{ listing.starting_price }}$ </h3>
 
