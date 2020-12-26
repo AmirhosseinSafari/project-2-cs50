@@ -13,7 +13,8 @@ class  Auction_listing_form(ModelForm):
     description = forms.CharField(
         required=True,
         widget=forms.Textarea(
-        attrs={"cols": 10, "rows": 6, "class": "form_description"}
+        attrs={"cols": 50, "rows": 6, "class": "form_description"
+         ,"placeholder": "Description of listing"}
         )
         )
 
