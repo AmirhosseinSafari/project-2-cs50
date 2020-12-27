@@ -176,6 +176,23 @@ def listing (request, listing_id):
                         listing.bids.add(user_bid)
 
         #-----------------------------------------------------------------------
+        # Creating commetns
+        #-----------------------------------------------------------------------
+
+        if new_comment != None:
+            
+            user_comment = Comments(author=request.user, text=new_comment)
+            comment_form = Comments_form(request.POST, instance=user_comment)
+
+            listing = Auction_listing.objects.get(id=listing_id)
+
+            if comment_form.is_valid():
+                comment_form.save()
+                messages.success(request, "Thanks, your comment was created successfully!")
+                listing.comments.add(user_comment)
+        
+
+        #-----------------------------------------------------------------------
         # If listing closed
         #-----------------------------------------------------------------------
 
@@ -199,22 +216,6 @@ def listing (request, listing_id):
 
             return render(request, "auctions/listing.html", content)
 
-        #-----------------------------------------------------------------------
-        # Creating commetns
-        #-----------------------------------------------------------------------
-
-        if new_comment != None:
-            
-            user_comment = Comments(author=request.user, text=new_comment)
-            comment_form = Comments_form(request.POST, instance=user_comment)
-
-            listing = Auction_listing.objects.get(id=listing_id)
-
-            if comment_form.is_valid():
-                comment_form.save()
-                messages.success(request, "Thanks, your comment was created successfully!")
-                listing.comments.add(user_comment)
-        
         
         #-----------------------------------------------------------------------
         # Creating watchlist
