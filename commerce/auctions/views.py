@@ -113,6 +113,40 @@ def listing (request, listing_id):
         new_bid = bid_form['amount'].value()
         new_comment = comments_form['text'].value()
 
+
+        #-----------------------------------------------------------------------
+        # Creating commetns
+        #-----------------------------------------------------------------------
+
+        if new_comment != None:
+            
+            user_comment = Comments(author=request.user, text=new_comment)
+            comment_form = Comments_form(request.POST, instance=user_comment)
+
+            listing = Auction_listing.objects.get(id=listing_id)
+
+            if comment_form.is_valid():
+                comment_form.save()
+                messages.success(request, "Thanks, your comment was created successfully!")
+                listing.comments.add(user_comment)
+
+
+        #-----------------------------------------------------------------------
+        # Creating watchlist
+        #-----------------------------------------------------------------------
+
+        if "add_to_watchlist" in request.POST:
+            watchlist_listing = User_listing(user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+            watchlist_listing.save()
+            messages.success(request, "Listing added to your watchlist successfully!")
+            
+        if "remove_from_watchlist" in request.POST:
+            watchlist_listing = User_listing.objects.get( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
+            watchlist_listing.delete()
+
+        return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
+
+        
         #-----------------------------------------------------------------------
         # Closing
         #-----------------------------------------------------------------------
@@ -176,22 +210,6 @@ def listing (request, listing_id):
                         messages.success(request, "Thanks, your bid was created successfully!")
                         Auction_listing.objects.filter(id=listing_id).update(starting_price=new_bid)
                         listing.bids.add(user_bid)
-
-        #-----------------------------------------------------------------------
-        # Creating commetns
-        #-----------------------------------------------------------------------
-
-        if new_comment != None:
-            
-            user_comment = Comments(author=request.user, text=new_comment)
-            comment_form = Comments_form(request.POST, instance=user_comment)
-
-            listing = Auction_listing.objects.get(id=listing_id)
-
-            if comment_form.is_valid():
-                comment_form.save()
-                messages.success(request, "Thanks, your comment was created successfully!")
-                listing.comments.add(user_comment)
         
 
         #-----------------------------------------------------------------------
@@ -217,22 +235,6 @@ def listing (request, listing_id):
             }
 
             return render(request, "auctions/listing.html", content)
-
-        
-        #-----------------------------------------------------------------------
-        # Creating watchlist
-        #-----------------------------------------------------------------------
-
-        if "add_to_watchlist" in request.POST:
-            watchlist_listing = User_listing(user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
-            watchlist_listing.save()
-            messages.success(request, "Listing added to your watchlist successfully!")
-            
-        if "remove_from_watchlist" in request.POST:
-            watchlist_listing = User_listing.objects.get( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
-            watchlist_listing.delete()
-
-        return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
     
     
     #-----------------------------------------------------------------------
