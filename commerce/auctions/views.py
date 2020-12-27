@@ -139,14 +139,17 @@ def listing (request, listing_id):
             watchlist_listing = User_listing(user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
             watchlist_listing.save()
             messages.success(request, "Listing added to your watchlist successfully!")
+
+            return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
+
             
         if "remove_from_watchlist" in request.POST:
             watchlist_listing = User_listing.objects.get( user=request.user, listing=Auction_listing.objects.get(id=listing_id) )
             watchlist_listing.delete()
 
-        return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
+            return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
 
-        
+
         #-----------------------------------------------------------------------
         # Closing
         #-----------------------------------------------------------------------
