@@ -149,7 +149,7 @@ def listing (request, listing_id):
 
             return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
 
-
+        
         #-----------------------------------------------------------------------
         # Closing
         #-----------------------------------------------------------------------
@@ -213,7 +213,8 @@ def listing (request, listing_id):
                         messages.success(request, "Thanks, your bid was created successfully!")
                         Auction_listing.objects.filter(id=listing_id).update(starting_price=new_bid)
                         listing.bids.add(user_bid)
-        
+
+                        return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
 
         #-----------------------------------------------------------------------
         # If listing closed
