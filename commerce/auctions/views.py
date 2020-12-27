@@ -83,8 +83,10 @@ def new_listing(request):
             messages.success(request, "Your listing is saved successfully")
             
             category = request.POST
-            new_category = Categories.create(category['category']) 
-            new_category.save()
+            
+            if not Categories.objects.filter( category=category['category'] ).exists():
+                new_category = Categories.create(category['category']) 
+                new_category.save()
 
             return HttpResponseRedirect(reverse(index))
 
