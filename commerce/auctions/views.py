@@ -129,6 +129,7 @@ def listing (request, listing_id):
                 comment_form.save()
                 messages.success(request, "Thanks, your comment was created successfully!")
                 listing.comments.add(user_comment)
+                return HttpResponseRedirect( reverse( "listing", args=(listing_id,) ) )
 
 
         #-----------------------------------------------------------------------
